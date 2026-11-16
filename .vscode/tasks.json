@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run RouteMate",
+			"type": "shell",
+			"command": "AI_Navigation_Chatbot\\backend\\.venv\\Scripts\\python.exe -m uvicorn main:app --reload --app-dir AI_Navigation_Chatbot\\backend",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

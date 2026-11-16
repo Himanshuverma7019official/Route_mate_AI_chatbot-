@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RouteMate AI — Smart Navigation</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/static/style.css?v=7">
+</head>
+<body>
+  <header class="topbar">
+    <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark theme" title="Switch to dark theme"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Dark mode</span></button>
+    <div class="brand"><span class="brand-icon">⌁</span><div><strong>RouteMate AI</strong><small>Local AI · Smart navigation</small></div></div>
+    <div class="header-actions"><span id="serviceStatus" class="status">Checking services…</span></div>
+  </header>
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <div class="section-heading"><div><p class="eyebrow">PLAN YOUR JOURNEY</p><h1>Where to next?</h1></div><span class="round-icon">➤</span></div>
+        <div class="source-label-row"><label for="source">Starting point</label><button id="locationToggle" class="location-toggle location-switch" type="button" aria-pressed="false" title="Use your computer's current GPS location as the route starting point"><span id="locationStatus">Use my current location</span><span class="toggle-track"><span class="toggle-knob"></span></span></button></div><input id="source" placeholder="e.g. Delhi University" value="Delhi University, Delhi">
+        <label for="destination">Destination</label><input id="destination" placeholder="e.g. India Gate" value="India Gate, New Delhi">
+        <div id="stops"></div>
+        <div class="inline-actions"><button id="addStop" class="text-button">＋ Add a stop</button><label class="check-label"><input id="alternatives" type="checkbox" checked> Alternatives</label></div><label for="routePreference">Route preference</label><select id="routePreference"><option value="fastest">Fastest route</option><option value="shortest">Shortest route</option><option value="eco">Eco-friendly route</option></select>
+        <button id="planRoute" class="btn btn-primary full">Find route <span>→</span></button>
+        <div id="routeMessage" class="message"></div>
+      </section>
+      <section id="routeResults" class="panel hidden">
+        <p class="eyebrow">JOURNEY OVERVIEW</p><div class="metrics"><div><strong id="distance">—</strong><small>Distance</small></div><div><strong id="duration">—</strong><small>Estimated time</small></div></div>
+        <div id="alternativesList"></div><div id="journeyTimeline" class="journey-timeline"></div>
+        <div class="section-row"><h2>Turn-by-turn</h2><button id="saveTrip" class="text-button">♡ Save trip</button></div>
+        <ol id="directions" class="directions"></ol>
+      </section>
+      <section class="panel">
+        <div class="section-row"><div><p class="eyebrow">DISCOVER NEARBY</p><h2>Places around you</h2></div></div>
+        <div class="nearby-controls"><select id="nearbyCategory"><option value="restaurant">Restaurants, cafés & food</option><option value="petrol">Petrol pumps</option><option value="hospital">Hospitals</option><option value="pharmacy">Pharmacies</option><option value="atm">ATMs</option><option value="charging">EV charging</option><option value="parking">Parking</option><option value="hotel">Hotels</option></select><select id="nearbyRadius"><option value="1000">1 km</option><option value="1500" selected>1.5 km</option><option value="3000">3 km</option><option value="5000">5 km</option></select></div>
+        <select id="nearbySort" class="nearby-sort"><option value="distance">Sort: nearest first</option><option value="name">Sort: name A–Z</option><option value="category">Sort: category</option></select><button id="findNearby" class="btn btn-outline full">Search near destination</button><div id="nearbyResults" class="place-list"></div>
+      </section>
+      <section class="panel">
+        <p class="eyebrow">EV TRIP ESTIMATOR</p><h2>Charging cost estimate</h2>
+        <div class="two-fields"><div><label for="efficiency">Consumption (kWh/100 km)</label><input id="efficiency" type="number" min="1" value="18"></div><div><label for="electricityPrice">Price (₹/kWh)</label><input id="electricityPrice" type="number" min="0" step=".5" value="8"></div></div>
+        <button id="estimateEV" class="btn btn-outline full">Estimate trip energy</button><div id="evResult" class="ev-result"></div>
+      </section>
+      <section class="panel">
+        <div class="section-row"><div><p class="eyebrow">YOUR AI COPILOT</p><h2>Ask RouteMate</h2></div><button id="refreshChat" class="chat-refresh" type="button" title="Start a new chat" aria-label="Refresh chat">↻</button></div>
+        <div class="chat-suggestions"><button data-prompt="Plan a route from Connaught Place to India Gate">Plan a route</button><button data-prompt="Find cafes near me and show the nearest ones">Find cafes</button><button data-prompt="Find hotels near me and sort them by name">Find hotels</button><button data-prompt="Summarize my current journey." >Summarize route</button><button data-prompt="What should I check before starting a long drive?">Trip checklist</button></div>
+        <div id="chatLog" class="chat-log"><div class="bubble assistant">Hi! I’m RouteMate. Plan a route, then ask me about your journey. I run on your local Ollama model.</div></div>
+        <form id="chatForm" class="chat-form"><input id="chatInput" placeholder="Ask about your journey…" autocomplete="off"><button type="button" id="voiceInput" class="icon-button" title="Speak">🎙</button><button class="send-button" title="Send">↑</button></form>
+        <div class="voice-row"><button id="speakLast" class="text-button">🔊 Read last answer</button><span id="voiceStatus">Voice depends on browser support</span></div>
+      </section>
+      <section id="savedPanel" class="panel"><p class="eyebrow">YOUR LIBRARY</p><h2>Saved journeys</h2><p class="muted">Shared demo collection while sign-in is disabled.</p><div id="savedTrips"></div></section>
+      <footer>Map data © OpenStreetMap contributors · Routes via OSRM demo · Not for emergency navigation.</footer>
+    </aside>
+    <section class="map-area"><div id="map"></div><div class="map-floating"><span class="live-dot"></span><div><strong>Interactive map</strong><small>Choose a route to see directions</small></div></div><div class="map-legend"><span><i class="legend-source"></i>Start</span><span><i class="legend-dest"></i>Destination</span></div></section>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/static/app.js?v=7"></script>
+</body>
+</html>
