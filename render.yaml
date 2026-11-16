@@ -7,7 +7,9 @@ services:
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
     envVars:
-      - key: OLLAMA_BASE_URL
+      - key: GEMINI_API_KEY
         sync: false
-      - key: OLLAMA_MODEL
-        value: qwen2.5:3b
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash-lite
+      - key: DATABASE_URL
+        sync: false

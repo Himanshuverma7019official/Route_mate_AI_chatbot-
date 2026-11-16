@@ -66,6 +66,9 @@ async def current_user(authorization: Optional[str] = Header(default=None)):
 
 @app.get("/api/health")
 async def health():
+    if os.getenv("GEMINI_API_KEY"):
+        return {"status": "ok", "ai": "configured", "provider": "gemini", "model": os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")}
+
     model = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
     try:
         async with httpx.AsyncClient(timeout=2.5) as client:
@@ -74,7 +77,7 @@ async def health():
         ollama_status = "connected"
     except Exception:
         ollama_status = "unavailable"
-    return {"status": "ok", "ollama": ollama_status, "model": model}
+    return {"status": "ok", "ai": ollama_status, "provider": "ollama", "model": model}
 
 @app.post("/api/auth/register")
 async def register(data: AuthInput):
@@ -159,7 +162,8 @@ async def chat(data: ChatInput, user=Depends(current_user)):
         raise HTTPException(status_code=400, detail="Message is too long (maximum 3000 characters).")
     try:
         answer = await chat_with_ollama(data.message, data.context or {})
-        return {"reply": answer, "model": os.getenv("OLLAMA_MODEL", "qwen2.5:3b")}
+        model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite") if os.getenv("GEMINI_API_KEY") else os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
+        return {"reply": answer, "model": model}
     except httpx.HTTPError:
         raise HTTPException(status_code=503, detail="Ollama is not responding. Start Ollama and check your model.")
     except Exception:
